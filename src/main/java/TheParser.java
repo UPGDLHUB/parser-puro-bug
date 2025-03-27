@@ -13,7 +13,8 @@ public class TheParser {
 	public void run() {
 		RULE_PROGRAM();
 	}
-	
+
+	// PROGRAM: { declarations methods }
 	private void RULE_PROGRAM() {
 		System.out.println("- RULE_PROGRAM");
 		if (tokens.get(currentToken).getValue().equals("{")) {
@@ -22,7 +23,8 @@ public class TheParser {
 		} else {
 			error(1);
 		}
-		RULE_BODY();
+		RULE_DECLARATIONS();
+		RULE_METHODS();
 		if (tokens.get(currentToken).getValue().equals("}")) {
 			currentToken++;
 			System.out.println("- }");
@@ -30,126 +32,110 @@ public class TheParser {
 			error(2);
 		}
 	}
-	
-	public void RULE_BODY() {
-		System.out.println("-- RULE_BODY");
-		while (!tokens.get(currentToken).getValue().equals("}")) {
-			RULE_EXPRESSION();
+
+	// DECLARATIONS: (type identifier ;)*
+	private void RULE_DECLARATIONS() {
+		System.out.println("-- RULE_DECLARATIONS");
+		while (isType(tokens.get(currentToken))) {
+			RULE_TYPES();
+			if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+				System.out.println("-- IDENTIFIER");
+				currentToken++;
+			} else {
+				error(6);
+			}
 			if (tokens.get(currentToken).getValue().equals(";")) {
+				currentToken++;
 				System.out.println("-- ;");
-				currentToken++;
 			} else {
-				error(3);
+				error(7);
 			}
 		}
 	}
-	
-	public void RULE_EXPRESSION() {
-		System.out.println("--- RULE_EXPRESSION");
-		RULE_X();
-		while (tokens.get(currentToken).getValue().equals("|")) {
-			currentToken++;
-			System.out.println("--- |");
-			RULE_X();
-		}
-	}
-	
-	public void RULE_X() {
-		System.out.println("---- RULE_X");
-		RULE_Y();
-		while (tokens.get(currentToken).getValue().equals("&")) {
-			currentToken++;
-			System.out.println("---- |");
-			RULE_Y();
-		}
-	}
-	
-	public void RULE_Y() {
-		System.out.println("----- RULE_Y");
-		if (tokens.get(currentToken).getValue().equals("!")) {
-			currentToken++;
-			System.out.println("----- !");
-		}
-		RULE_R();
-	}
-	
-	public void RULE_R() {
-		System.out.println("------ RULE_R");
-		RULE_E();
-		while (tokens.get(currentToken).getValue().equals("<")
-			| tokens.get(currentToken).getValue().equals(">")
-			| tokens.get(currentToken).getValue().equals("==")
-			| tokens.get(currentToken).getValue().equals("!=")
-		) {
-			currentToken++;
-			System.out.println("------ relational operator");
-			RULE_E();
-		}
-	}
-	
-	public void RULE_E() {
-		System.out.println("------- RULE_E");
-		RULE_A();
-		while (tokens.get(currentToken).getValue().equals("-")
-			| tokens.get(currentToken).getValue().equals("+")
-		) {
-			currentToken++;
-			System.out.println("------- + or -");
-			RULE_A();
-		}
-		
-	}
-	
-	public void RULE_A() {
-		System.out.println("-------- RULE_A");
-		RULE_B();
-		while (tokens.get(currentToken).getValue().equals("/")
-			| tokens.get(currentToken).getValue().equals("*")
-		) {
-			currentToken++;
-			System.out.println("-------- * or /");
-			RULE_B();
-		}
-		
-	}
-	
-	public void RULE_B() {
-		System.out.println("--------- RULE_B");
-		if (tokens.get(currentToken).getValue().equals("-")) {
-			currentToken++;
-			System.out.println("--------- -");
-		}
-		RULE_C();
-	}
-	
-	public void RULE_C() {
-		System.out.println("---------- RULE_C");
-		if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-			currentToken++;
-			System.out.println("---------- IDENTIFIER");
-		} else if (tokens.get(currentToken).getType().equals("INTEGER")) {
-			currentToken++;
-			System.out.println("---------- INTEGER");
-		} else if (tokens.get(currentToken).getValue().equals("(")) {
-			currentToken++;
-			System.out.println("---------- (");
-			RULE_EXPRESSION();
-			if (tokens.get(currentToken).getValue().equals(")")) {
+
+	// METHODS: (type identifier ( PARAMS ) { BODY })*
+	private void RULE_METHODS() {
+		System.out.println("-- RULE_METHODS");
+		while (isType(tokens.get(currentToken))) {
+			RULE_TYPES();
+			if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
 				currentToken++;
-				System.out.println("---------- )");
+				System.out.println("-- IDENTIFIER");
 			} else {
-				error(4);
+				error(8);
 			}
+			if (tokens.get(currentToken).getValue().equals("(")) {
+				currentToken++;
+				System.out.println("-- (");
+				RULE_PARAMS();
+				if (tokens.get(currentToken).getValue().equals(")")) {
+					currentToken++;
+					System.out.println("-- )");
+				} else {
+					error(9);
+				}
+			} else {
+				error(10);
+			}
+			if (tokens.get(currentToken).getValue().equals("{")) {
+				currentToken++;
+				System.out.println("-- {");
+				RULE_BODY();
+				if (tokens.get(currentToken).getValue().equals("}")) {
+					currentToken++;
+					System.out.println("-- }");
+				} else {
+					error(11);
+				}
+			} else {
+				error(12);
+			}
+		}
+	}
+
+	// TYPES: int | float | char | boolean
+	private void RULE_TYPES() {
+		System.out.println("--- RULE_TYPES");
+		if (isType(tokens.get(currentToken))) {
+			System.out.println("--- " + tokens.get(currentToken).getValue());
+			currentToken++;
 		} else {
-			error(5);
+			error(13);
 		}
 	}
-	
+
+	private boolean isType(TheToken token) {
+		return token.getValue().equals("int") || token.getValue().equals("float") ||
+				token.getValue().equals("char") || token.getValue().equals("boolean");
+	}
+
+	// PARAMS: (type identifier (, type identifier)*)?
+	private void RULE_PARAMS() {
+		System.out.println("--- RULE_PARAMS");
+		if (isType(tokens.get(currentToken))) {
+			RULE_TYPES();
+			if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+				currentToken++;
+				System.out.println("--- IDENTIFIER");
+			} else {
+				error(14);
+			}
+			while (tokens.get(currentToken).getValue().equals(",")) {
+				currentToken++;
+				System.out.println("--- ,");
+				RULE_TYPES();
+				if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+					currentToken++;
+					System.out.println("--- IDENTIFIER");
+				} else {
+					error(15);
+				}
+			}
+		}
+	}
+
 	private void error(int error) {
-		System.out.println("Error " + error +
-			" at line " + tokens.get(currentToken));
+		System.out.println("Error " + error + " at line " + tokens.get(currentToken));
 		System.exit(1);
 	}
-	
-}
-
+} 
