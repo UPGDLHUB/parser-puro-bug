@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
-import path.to.Automata;
-import path.to.TheToken;
+import Automata; // Si está en el mismo paquete
+import TheToken; // Si está en el mismo paquete
 
 public class Lexer {
     private File file;
