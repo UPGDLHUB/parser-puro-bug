@@ -1,5 +1,7 @@
 import java.io.*;
 import java.util.*;
+import path.to.Automata;
+import path.to.TheToken;
 
 public class Lexer {
     private File file;
