@@ -1,5 +1,7 @@
 import java.util.Vector;
-import path.to.Lexer;
+import Lexer;
+import Automata; // Si está en el mismo paquete
+import TheToken; // Si está en el mismo paquete
 
 public class TheParser {
     private Vector<TheToken> tokens;
