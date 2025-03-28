@@ -1,6 +1,5 @@
 import java.util.Vector;
-import path.to.Automata;
-import path.to.Token;
+
 
 public class TheParser {
     private Vector<TheToken> tokens;
