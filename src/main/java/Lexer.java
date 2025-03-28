@@ -109,7 +109,7 @@ public class Lexer {
 
     private void processLine(String line) {
         int i = 0;
-        StringBuilder currentToken = new StringBuilder();
+        StringBuilder currentTheToken = new StringBuilder();
         String currentState = "s0";
 
         while (i < line.length()) {
@@ -119,7 +119,7 @@ public class Lexer {
             if (isWhitespace(c)) {
                 if (currentToken.length() > 0) {
                     addToken(currentState, currentToken.toString());
-                    currentToken = new StringBuilder();
+                    currentTheToken = new StringBuilder();
                     currentState = "s0";
                 }
                 i++;
@@ -130,7 +130,7 @@ public class Lexer {
             if (isDelimiter(c)) {
                 if (currentToken.length() > 0) {
                     addToken(currentState, currentToken.toString());
-                    currentToken = new StringBuilder();
+                    currentTheToken = new StringBuilder();
                 }
                 tokens.add(new Token(String.valueOf(c), "DELIMITER"));
                 currentState = "s0";
@@ -141,7 +141,7 @@ public class Lexer {
             if (isOperator(c)) {
                 if (currentToken.length() > 0) {
                     addToken(currentState, currentToken.toString());
-                    currentToken = new StringBuilder();
+                    currentTheToken = new StringBuilder();
                 }
                 
                 // Verificar operadores dobles
@@ -164,7 +164,7 @@ public class Lexer {
             } else {
                 if (currentToken.length() > 0) {
                     addToken(currentState, currentToken.toString());
-                    currentToken = new StringBuilder();
+                    currentTheToken = new StringBuilder();
                 }
                 currentToken.append(c);
                 currentState = "s0";
@@ -215,11 +215,11 @@ public class Lexer {
     }
 
     public void printTokens() {
-        System.out.println("\nToken List:");
+        System.out.println("\nTheToken List:");
         System.out.printf("%-15s -> %-12s\n", "Value", "Type");
         System.out.println("-".repeat(30));
         
-        for (Token token : tokens) {
+        for (TheToken TheToken : tokens) {
             System.out.printf("%-15s -> %-12s\n", 
                 truncateValue(token.getValue()), 
                 token.getType());
