@@ -39,14 +39,14 @@ public class TheParser {
 
     // DECLARATIONS: (type identifier (= EXPRESSION)? ;)*
     private void RULE_DECLARATIONS() {
-        System.out.println("-- RULE_GLOBAL_DECLARATIONS");
+        System.out.println("-- RULE_DECLARATIONS");
         while (isType(tokens.get(currentToken))) {
             String type = tokens.get(currentToken).getValue();
             RULE_TYPES();
             
             if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
                 String identifier = tokens.get(currentToken).getValue();
-                System.out.println("-- Global Attribute: " + type + " " + identifier);
+                System.out.println("-- Attribute: " + type + " " + identifier);
                 currentToken++;
                 
                 // Optional initialization
