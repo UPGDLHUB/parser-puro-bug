@@ -16,7 +16,7 @@ public class TheParser {
     // PROGRAM: { global variable declarations methods }
     private void RULE_PROGRAM() {
         System.out.println("- RULE_PROGRAM");
-        if (tokens.get(currentToken).getWord().equals("{")) {
+        if (tokens.get(currentToken).getValue().equals("{")) {
             currentToken++;
             System.out.println("- {");
         } else {
@@ -348,7 +348,7 @@ public class TheParser {
     // Expression rule
     private void RULE_EXPRESSION() {
         RULE_X();
-        while (tokens.get(currentToken).getWord().equals("|")) {
+        while (tokens.get(currentToken).getValue().equals("|")) {
             System.out.println("--- |");
             currentToken++;
             RULE_X();
@@ -357,7 +357,7 @@ public class TheParser {
 
     private void RULE_X() {
         RULE_Y();
-        while (tokens.get(currentToken).getWord().equals("&")) {
+        while (tokens.get(currentToken).getValue().equals("&")) {
             System.out.println("--- &");
             currentToken++;
             RULE_Y();
@@ -365,7 +365,7 @@ public class TheParser {
     }
 
     private void RULE_Y() {
-        if (tokens.get(currentToken).getWord().equals("!")) {
+        if (tokens.get(currentToken.getValue().equals("!")) {
             System.out.println("--- !");
             currentToken++;
         }
@@ -373,11 +373,11 @@ public class TheParser {
     }
 
     private void RULE_R() {
-        while (tokens.get(currentToken).getWord().equals("<") |
-               tokens.get(currentToken).getWord().equals(">") |
-               tokens.get(currentToken).getWord().equals("==") |
-               tokens.get(currentToken).getWord().equals("!=")) {
-            System.out.println("--- " + tokens.get(currentToken).getWord());
+        while (tokens.get(currentToken).getValue().equals("<") |
+               tokens.get(currentToken).getValue().equals(">") |
+               tokens.get(currentToken).getValue().equals("==") |
+               tokens.get(currentToken).getValue().equals("!=")) {
+            System.out.println("--- " + tokens.get(currentToken).getValue());
             currentToken++;
             RULE_E();
         }
@@ -385,9 +385,9 @@ public class TheParser {
 
     private void RULE_E() {
         RULE_A();
-        while (tokens.get(currentToken).getWord().equals("-") |
-              tokens.get(currentToken).getWord().equals("+")) {
-            System.out.println("--- " + + tokens.get(currentToken).getWord());
+        while (tokens.get(currentToken).getValue().equals("-") |
+              tokens.get(currentToken).getValue().equals("+")) {
+            System.out.println("--- " + + tokens.get(currentToken).getValue());
             currentToken++;
             RULE_A();
         }
@@ -395,16 +395,16 @@ public class TheParser {
 
     private void RULE_A() {
         RULE_B();
-        while (tokens.get(currentToken).getWord().equals("/") |
-              tokens.get(currentToken).getWord().equals("*")) {
-            System.out.println("--- " + + tokens.get(currentToken).getWord());
+        while (tokens.get(currentToken).getValue().equals("/") |
+              tokens.get(currentToken).getValue().equals("*")) {
+            System.out.println("--- " + + tokens.get(currentToken).getValue());
             currentToken++;
             RULE_B();
         }
     }
 
     private void RULE_B() {
-        if (tokens.get(currentToken).getWord().equals("-")) {
+        if (tokens.get(currentToken).getValue().equals("-")) {
             System.out.println("--- -");
             currentToken++;
         }
