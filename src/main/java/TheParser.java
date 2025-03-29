@@ -410,7 +410,52 @@ public class TheParser {
         }
         //RULE_C();
     }
-    
+
+    private void RULE_C() {
+        if(tokens.get(currentToken).getValue().equals("integer")) {
+            System.out.println("--- INTEGER");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("octal")) {
+            System.out.println("--- OCTAL");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("hexadecimal")) {
+            System.out.println("--- HEXADECIMAL");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("binary")) {
+            System.out.println("--- BINARY");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("true")) {
+            System.out.println("--- TRUE");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("false")) {
+            System.out.println("--- FALSE");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("string")) {
+            System.out.println("--- STRING");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("char")) {
+            System.out.println("--- CHAR");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("float")) {
+            System.out.println("--- FLOAT");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("identifier")) {
+            System.out.println("--- IDENTIFIER");
+            currentToken++;
+        } else if(tokens.get(currentToken).getValue().equals("(")) {
+            System.out.println("--- (");
+            currentToken++;
+            RULE_EXPRESSION();
+            if(tokens.get(currentToken).getValue().equals(")")) {
+                System.out.println("--- )");
+                currentToken++;
+            } else {
+                error(4);
+            }
+        } else {
+            error(5);
+        }
+    }
     // Error handling
     private void error(int code) {
         System.out.println("Error in code: " + code);
