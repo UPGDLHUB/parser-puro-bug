@@ -16,7 +16,7 @@ public class TheParser {
     // PROGRAM: { global variable declarations methods }
     private void RULE_PROGRAM() {
         System.out.println("- RULE_PROGRAM");
-        if (tokens.get(currentToken).getValue().equals("{")) {
+        if (tokens.get(currentToken).getWord().equals("{")) {
             currentToken++;
             System.out.println("- {");
         } else {
@@ -347,11 +347,70 @@ public class TheParser {
 
     // Expression rule
     private void RULE_EXPRESSION() {
-        System.out.println("--- RULE_EXPRESSION");
-        // Placeholder for actual expression parsing logic
-        currentToken++;
+        RULE_X();
+        while (tokens.get(currentToken).getWord().equals("|")) {
+            System.out.println("--- |");
+            currentToken++;
+            RULE_X();
+        }
     }
 
+    private void RULE_X() {
+        RULE_Y();
+        while (tokens.get(currentToken).getWord().equals("&")) {
+            System.out.println("--- &");
+            currentToken++;
+            RULE_Y();
+        }
+    }
+
+    private void RULE_Y() {
+        if (tokens.get(currentToken).getWord().equals("!")) {
+            System.out.println("--- !");
+            currentToken++;
+        }
+        RULE_R();
+    }
+
+    private void RULE_R() {
+        while (tokens.get(currentToken).getWord().equals("<") |
+               tokens.get(currentToken).getWord().equals(">") |
+               tokens.get(currentToken).getWord().equals("==") |
+               tokens.get(currentToken).getWord().equals("!=")) {
+            System.out.println("--- " + tokens.get(currentToken).getWord());
+            currentToken++;
+            RULE_E();
+        }
+    }
+
+    private void RULE_E() {
+        RULE_A();
+        while (tokens.get(currentToken).getWord().equals("-") |
+              tokens.get(currentToken).getWord().equals("+")) {
+            System.out.println("--- " + + tokens.get(currentToken).getWord());
+            currentToken++;
+            RULE_A();
+        }
+    }
+
+    private void RULE_A() {
+        RULE_B();
+        while (tokens.get(currentToken).getWord().equals("/") |
+              tokens.get(currentToken).getWord().equals("*")) {
+            System.out.println("--- " + + tokens.get(currentToken).getWord());
+            currentToken++;
+            RULE_B();
+        }
+    }
+
+    private void RULE_B() {
+        if (tokens.get(currentToken).getWord().equals("-")) {
+            System.out.println("--- -");
+            currentToken++;
+        }
+        RULE_C();
+    }
+    
     // Error handling
     private void error(int code) {
         System.out.println("Error in code: " + code);
