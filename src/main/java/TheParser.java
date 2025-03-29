@@ -41,18 +41,14 @@ public class TheParser {
     private void RULE_DECLARATIONS() {
         System.out.println("-- RULE_DECLARATIONS");
         while (isType(tokens.get(currentToken))) {
-            String type = tokens.get(currentToken).getValue();
             RULE_TYPES();
-            
             if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-                String identifier = tokens.get(currentToken).getValue();
-                System.out.println("-- Attribute: " + type + " " + identifier);
+                System.out.println("-- IDENTIFIER");
                 currentToken++;
                 
                 // Optional initialization
                 if (tokens.get(currentToken).getValue().equals("=")) {
                     currentToken++;
-                    System.out.println("-- Initialization");
                     RULE_EXPRESSION();
                 }
                 
@@ -352,16 +348,8 @@ public class TheParser {
     // Expression rule
     private void RULE_EXPRESSION() {
         System.out.println("--- RULE_EXPRESSION");
-        if (tokens.get(currentToken).getType().equals("IDENTIFIER") || 
-            tokens.get(currentToken).getType().equals("NUMBER") ||
-            tokens.get(currentToken).getType().equals("STRING") ||
-            tokens.get(currentToken).getValue().equals("true") ||
-            tokens.get(currentToken).getValue().equals("false")) {
-            System.out.println("--- Value: " + tokens.get(currentToken).getValue());
-            currentToken++;
-        } else {
-            error(40);
-        }
+        // Placeholder for actual expression parsing logic
+        currentToken++;
     }
 
     // Error handling
