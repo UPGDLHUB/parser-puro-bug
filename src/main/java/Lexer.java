@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.*;
-import Automata; // Si está en el mismo paquete
-import TheToken; // Si está en el mismo paquete
+
 
 public class Lexer {
     private File file;
@@ -109,7 +108,7 @@ public class Lexer {
 
     private void processLine(String line) {
         int i = 0;
-        StringBuilder currentTheToken = new StringBuilder();
+        StringBuilder currentToken = new StringBuilder();
         String currentState = "s0";
 
         while (i < line.length()) {
@@ -119,7 +118,7 @@ public class Lexer {
             if (isWhitespace(c)) {
                 if (currentToken.length() > 0) {
                     addToken(currentState, currentToken.toString());
-                    currentTheToken = new StringBuilder();
+                    currentToken = new StringBuilder();
                     currentState = "s0";
                 }
                 i++;
@@ -130,7 +129,7 @@ public class Lexer {
             if (isDelimiter(c)) {
                 if (currentToken.length() > 0) {
                     addToken(currentState, currentToken.toString());
-                    currentTheToken = new StringBuilder();
+                    currentToken = new StringBuilder();
                 }
                 tokens.add(new Token(String.valueOf(c), "DELIMITER"));
                 currentState = "s0";
@@ -141,7 +140,7 @@ public class Lexer {
             if (isOperator(c)) {
                 if (currentToken.length() > 0) {
                     addToken(currentState, currentToken.toString());
-                    currentTheToken = new StringBuilder();
+                    currentToken = new StringBuilder();
                 }
                 
                 // Verificar operadores dobles
@@ -164,7 +163,7 @@ public class Lexer {
             } else {
                 if (currentToken.length() > 0) {
                     addToken(currentState, currentToken.toString());
-                    currentTheToken = new StringBuilder();
+                    currentToken = new StringBuilder();
                 }
                 currentToken.append(c);
                 currentState = "s0";
@@ -215,11 +214,11 @@ public class Lexer {
     }
 
     public void printTokens() {
-        System.out.println("\nTheToken List:");
+        System.out.println("\nToken List:");
         System.out.printf("%-15s -> %-12s\n", "Value", "Type");
         System.out.println("-".repeat(30));
         
-        for (TheToken TheToken : tokens) {
+        for (Token token : tokens) {
             System.out.printf("%-15s -> %-12s\n", 
                 truncateValue(token.getValue()), 
                 token.getType());
