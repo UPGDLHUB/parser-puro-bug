@@ -1,4 +1,4 @@
-import java.util.Vector;
+/*import java.util.Vector;
 import Lexer;
 import Automata; // Si está en el mismo paquete
 import TheToken; // Si está en el mismo paquete
@@ -514,3 +514,4 @@ private void RULE_WHILE() {
         System.exit(1);
     }
 }
+*/
