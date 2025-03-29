@@ -12,7 +12,7 @@ public class TheMain {
 	
 	public static void main(String[] args) throws IOException {
 		File file = new File("src/main/resources/inputStatements.txt");
-		TheLexer lexer = new TheLexer(file);
+		Lexer lexer = new Lexer(file);
 		lexer.run();
 		lexer.printTokens();
 		
