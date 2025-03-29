@@ -387,7 +387,7 @@ public class TheParser {
         RULE_A();
         while (tokens.get(currentToken).getValue().equals("-") |
               tokens.get(currentToken).getValue().equals("+")) {
-            System.out.println("--- " + + tokens.get(currentToken).getValue());
+            System.out.println("--- " + tokens.get(currentToken).getValue());
             currentToken++;
             RULE_A();
         }
@@ -397,7 +397,7 @@ public class TheParser {
         RULE_B();
         while (tokens.get(currentToken).getValue().equals("/") |
               tokens.get(currentToken).getValue().equals("*")) {
-            System.out.println("--- " + + tokens.get(currentToken).getValue());
+            System.out.println("--- " + tokens.get(currentToken).getValue());
             currentToken++;
             RULE_B();
         }
@@ -408,7 +408,7 @@ public class TheParser {
             System.out.println("--- -");
             currentToken++;
         }
-        RULE_C();
+        //RULE_C();
     }
     
     // Error handling
