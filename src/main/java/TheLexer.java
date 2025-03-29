@@ -1,16 +1,22 @@
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Vector;
 
 
-public class Lexer {
+public class TheLexer {
     private File file;
     private Automata dfa;
-    private Vector<Token> tokens;
+    private Vector<TheToken> tokens;
     private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
         "int", "float", "if", "else", "while", "do", "break", "continue", "end", "boolean"
     ));
 
-    public Lexer(File file) {
+    public TheLexer(File file) {
         this.file = file;
         tokens = new Vector<>();
         dfa = new Automata();
@@ -131,7 +137,7 @@ public class Lexer {
                     addToken(currentState, currentToken.toString());
                     currentToken = new StringBuilder();
                 }
-                tokens.add(new Token(String.valueOf(c), "DELIMITER"));
+                tokens.add(new TheToken(String.valueOf(c), "DELIMITER"));
                 currentState = "s0";
                 i++;
                 continue;
@@ -149,7 +155,7 @@ public class Lexer {
                     operator = c + String.valueOf(line.charAt(i + 1));
                     i++;
                 }
-                tokens.add(new Token(operator, "OPERATOR"));
+                tokens.add(new TheToken(operator, "OPERATOR"));
                 currentState = "s0";
                 i++;
                 continue;
@@ -181,14 +187,14 @@ public class Lexer {
         if (dfa.isAcceptState(state)) {
             String type = dfa.getAcceptStateName(state);
             if (type.equals("IDENTIFIER") && KEYWORDS.contains(value.toLowerCase())) {
-                tokens.add(new Token(value, "KEYWORD"));
+                tokens.add(new TheToken(value, "KEYWORD"));
             } else if (type.equals("BINARY") && !value.matches("0b[01]+")) {
-                tokens.add(new Token(value, "ERROR"));
+                tokens.add(new TheToken(value, "ERROR"));
             } else {
-                tokens.add(new Token(value, type));
+                tokens.add(new TheToken(value, type));
             }
         } else {
-            tokens.add(new Token(value, "ERROR"));
+            tokens.add(new TheToken(value, "ERROR"));
         }
     }
 
@@ -218,7 +224,7 @@ public class Lexer {
         System.out.printf("%-15s -> %-12s\n", "Value", "Type");
         System.out.println("-".repeat(30));
         
-        for (Token token : tokens) {
+        for (TheToken token : tokens) {
             System.out.printf("%-15s -> %-12s\n", 
                 truncateValue(token.getValue()), 
                 token.getType());
@@ -230,7 +236,7 @@ public class Lexer {
         return value.length() > 15 ? value.substring(0, 12) + "..." : value;
     }
 
-    public Vector<Token> getTokens() {
+    public Vector<TheToken> getTokens() {
         return tokens;
     }
 }
