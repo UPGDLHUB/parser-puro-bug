@@ -164,6 +164,11 @@ public class TheParser {
                 RULE_VARIABLE();
             }
             // Llamadas a métodos
+            else if (tokens.get(currentToken).getType().equals("IDENTIFIER") && 
+                     tokens.size() > currentToken + 1 && 
+                     tokens.get(currentToken + 1).getValue().equals("=")) {
+                RULE_ASSIGNMENT();
+            }
             else if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
                 RULE_CALL_METHOD();
             }
@@ -198,14 +203,15 @@ public class TheParser {
         }
     }
 
-    // Local variable declaration with optional initialization
+    // Local variable declaration with initialization
     private void RULE_VARIABLE() {
         System.out.println("--- RULE_VARIABLE");
         RULE_TYPES();
+        
         if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
             currentToken++;
             
-            // Inicialización opcional
+            // Inicialización obligatoria o opcional
             if (tokens.get(currentToken).getValue().equals("=")) {
                 currentToken++;
                 RULE_EXPRESSION();
@@ -214,10 +220,10 @@ public class TheParser {
             if (tokens.get(currentToken).getValue().equals(";")) {
                 currentToken++;
             } else {
-                error(17);
+                error(62);
             }
         } else {
-            error(18);
+            error(63);
         }
     }
 
@@ -585,14 +591,243 @@ public class TheParser {
     }
 
     // Expression rule
+    // Expression rule - highest level of precedence hierarchy
     private void RULE_EXPRESSION() {
         System.out.println("--- RULE_EXPRESSION");
-        // Placeholder for actual expression parsing logic
-        // Aquí debería implementarse una lógica completa para analizar expresiones
-        // pero para simplificar, avanzamos el token
-        currentToken++;
+        RULE_X();
+    }
+    
+    // X: Assignment expressions
+    private void RULE_X() {
+        System.out.println("--- RULE_X");
+        RULE_Y();
+        
+        if (tokens.get(currentToken).getValue().equals("=")) {
+            currentToken++;
+            RULE_X(); // Recursive to handle chained assignments
+        }
+    }
+    
+    // Y: Logical OR
+    private void RULE_Y() {
+        System.out.println("--- RULE_Y");
+        RULE_R();
+        
+        while (tokens.get(currentToken).getValue().equals("|")) {
+            currentToken++;
+            if (tokens.get(currentToken).getValue().equals("|")) {
+                currentToken++;
+                RULE_R();
+            } else {
+                error(50); // Expected second | for OR operator
+            }
+        }
+    }
+    
+    // R: Logical AND (adjusted for two-character operators)
+    private void RULE_R() {
+        System.out.println("--- RULE_R");
+        RULE_E();
+        
+        while (tokens.get(currentToken).getValue().equals("&")) {
+            currentToken++;
+            if (tokens.get(currentToken).getValue().equals("&")) {
+                currentToken++;
+                RULE_E();
+            } else {
+                error(51); // Expected second & for AND operator
+            }
+        }
+    }
+    
+    // E: Equality expressions
+    private void RULE_E() {
+        System.out.println("--- RULE_E");
+        RULE_A();
+        
+        while (tokens.get(currentToken).getValue().equals("=") ||
+               tokens.get(currentToken).getValue().equals("!")) {
+            
+            if (tokens.get(currentToken).getValue().equals("=")) {
+                currentToken++;
+                if (tokens.get(currentToken).getValue().equals("=")) {
+                    currentToken++;
+                    RULE_A();
+                } else {
+                    error(52); // Expected second = for equality operator
+                }
+            } else { // Must be "!"
+                currentToken++;
+                if (tokens.get(currentToken).getValue().equals("=")) {
+                    currentToken++;
+                    RULE_A();
+                } else {
+                    error(53); // Expected = after ! for inequality operator
+                }
+            }
+        }
+    }
+    
+    // A: Relational expressions
+    private void RULE_A() {
+        System.out.println("--- RULE_A");
+        RULE_B();
+        
+        while (tokens.get(currentToken).getValue().equals("<") ||
+               tokens.get(currentToken).getValue().equals(">")) {
+            
+            String operator = tokens.get(currentToken).getValue();
+            currentToken++;
+            
+            // Handle <= and >= operators as separate tokens
+            if (tokens.get(currentToken).getValue().equals("=")) {
+                currentToken++;
+            }
+            
+            RULE_B();
+        }
+    }
+    
+    // B: Additive expressions
+    private void RULE_B() {
+        System.out.println("--- RULE_B");
+        RULE_C();
+        
+        while (tokens.get(currentToken).getValue().equals("+") ||
+               tokens.get(currentToken).getValue().equals("-")) {
+            
+            currentToken++;
+            RULE_C();
+        }
+    }
+    
+    // C: Multiplicative expressions and primary expressions
+    private void RULE_C() {
+        System.out.println("--- RULE_C");
+        
+        // Check for identifiers which could be variables or method calls
+        if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+            String identifier = tokens.get(currentToken).getValue();
+            currentToken++;
+            
+            // Check if it's a method call
+            if (tokens.get(currentToken).getValue().equals("(")) {
+                currentToken--;  // Go back to the identifier
+                RULE_METHOD_CALL_EXPR();
+            }
+            // Otherwise it's just a variable reference, already consumed
+        }
+        // Check for literals
+        else if (tokens.get(currentToken).getType().equals("INTEGER") ||
+                 tokens.get(currentToken).getType().equals("FLOAT") ||
+                 tokens.get(currentToken).getType().equals("CHAR") ||
+                 tokens.get(currentToken).getType().equals("STRING") ||
+                 tokens.get(currentToken).getValue().equals("true") ||
+                 tokens.get(currentToken).getValue().equals("false")) {
+            currentToken++;
+        }
+        // Check for parenthesized expressions
+        else if (tokens.get(currentToken).getValue().equals("(")) {
+            currentToken++;
+            RULE_EXPRESSION();
+            if (tokens.get(currentToken).getValue().equals(")")) {
+                currentToken++;
+            } else {
+                error(55);
+            }
+        }
+        else {
+            error(56);
+        }
+        
+        // Handle multiplication and division operators
+        while (tokens.get(currentToken).getValue().equals("*") ||
+               tokens.get(currentToken).getValue().equals("/") ||
+               tokens.get(currentToken).getValue().equals("%")) {
+            currentToken++;
+            
+            // Right operand
+            if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+                String identifier = tokens.get(currentToken).getValue();
+                currentToken++;
+                
+                // Check if it's a method call
+                if (tokens.get(currentToken).getValue().equals("(")) {
+                    currentToken--;  // Go back to the identifier
+                    RULE_METHOD_CALL_EXPR();
+                }
+                // Otherwise it's just a variable reference, already consumed
+            }
+            else if (tokens.get(currentToken).getType().equals("INTEGER") ||
+                     tokens.get(currentToken).getType().equals("FLOAT") ||
+                     tokens.get(currentToken).getType().equals("CHAR") ||
+                     tokens.get(currentToken).getType().equals("STRING") ||
+                     tokens.get(currentToken).getValue().equals("true") ||
+                     tokens.get(currentToken).getValue().equals("false")) {
+                currentToken++;
+            }
+            else if (tokens.get(currentToken).getValue().equals("(")) {
+                currentToken++;
+                RULE_EXPRESSION();
+                if (tokens.get(currentToken).getValue().equals(")")) {
+                    currentToken++;
+                } else {
+                    error(57);
+                }
+            }
+            else {
+                error(58);
+            }
+        }
+    }
+    
+    // Method call as an expression value
+    private void RULE_METHOD_CALL_EXPR() {
+        System.out.println("--- RULE_METHOD_CALL_EXPR");
+        if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+            currentToken++;
+            
+            // Parámetros del método
+            if (tokens.get(currentToken).getValue().equals("(")) {
+                currentToken++;
+                RULE_PARAM_VALUES();
+                if (tokens.get(currentToken).getValue().equals(")")) {
+                    currentToken++;
+                } else {
+                    error(59);
+                }
+            } else {
+                error(60);
+            }
+        } else {
+            error(61);
+        }
     }
 
+    // Assignment rule
+    private void RULE_ASSIGNMENT() {
+        System.out.println("--- RULE_ASSIGNMENT");
+        
+        if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+            currentToken++;
+            
+            if (tokens.get(currentToken).getValue().equals("=")) {
+                currentToken++;
+                RULE_EXPRESSION();
+                
+                if (tokens.get(currentToken).getValue().equals(";")) {
+                    currentToken++;
+                } else {
+                    error(64);
+                }
+            } else {
+                error(65); // Expected assignment operator
+            }
+        } else {
+            error(66); // Expected identifier for assignment
+        }
+    }
+    
     // Error handling
     private void error(int code) {
         System.out.println("Error in code: " + code);
