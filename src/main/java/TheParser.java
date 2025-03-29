@@ -1,6 +1,5 @@
 import java.util.Vector;
 
-
 public class TheParser {
     private Vector<TheToken> tokens;
     private int currentToken;
@@ -15,28 +14,28 @@ public class TheParser {
     }
 
     // PROGRAM: { global variable declarations methods }
-private void RULE_PROGRAM() {
-    System.out.println("- RULE_PROGRAM");
-    if (tokens.get(currentToken).getValue().equals("{")) {
-        currentToken++;
-        System.out.println("- {");
-    } else {
-        error(1);
+    private void RULE_PROGRAM() {
+        System.out.println("- RULE_PROGRAM");
+        if (tokens.get(currentToken).getValue().equals("{")) {
+            currentToken++;
+            System.out.println("- {");
+        } else {
+            error(1);
+        }
+        
+        // Declaraciones de atributos globales
+        RULE_DECLARATIONS();
+        
+        // Declaraciones de métodos
+        RULE_METHODS();
+        
+        if (tokens.get(currentToken).getValue().equals("}")) {
+            currentToken++;
+            System.out.println("- }");
+        } else {
+            error(2);
+        }
     }
-    
-    // Declaraciones de atributos globales
-    RULE_DECLARATIONS();
-    
-    // Declaraciones de métodos
-    RULE_METHODS();
-    
-    if (tokens.get(currentToken).getValue().equals("}")) {
-        currentToken++;
-        System.out.println("- }");
-    } else {
-        error(2);
-    }
-}
 
     // DECLARATIONS: (type identifier (= EXPRESSION)? ;)*
     private void RULE_DECLARATIONS() {
@@ -67,59 +66,60 @@ private void RULE_PROGRAM() {
 
     // METHODS: (type identifier ( PARAMS ) { BODY })*
     private void RULE_METHODS() {
-    System.out.println("-- RULE_METHODS");
-    while (isType(tokens.get(currentToken))) {
-        RULE_TYPES();
-        
-        // Nombre del método
-        if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-            currentToken++;
-            System.out.println("-- IDENTIFIER");
-        } else {
-            error(8);
-        }
-        
-        // Parámetros
-        if (tokens.get(currentToken).getValue().equals("(")) {
-            currentToken++;
-            System.out.println("-- (");
-            RULE_PARAMS();
-            if (tokens.get(currentToken).getValue().equals(")")) {
+        System.out.println("-- RULE_METHODS");
+        while (isType(tokens.get(currentToken))) {
+            RULE_TYPES();
+            
+            // Nombre del método
+            if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
                 currentToken++;
-                System.out.println("-- )");
+                System.out.println("-- IDENTIFIER");
             } else {
-                error(9);
+                error(8);
             }
-        } else {
-            error(10);
-        }
-        
-        // Cuerpo del método
-        if (tokens.get(currentToken).getValue().equals("{")) {
-            currentToken++;
-            System.out.println("-- {");
-            RULE_BODY();
-            if (tokens.get(currentToken).getValue().equals("}")) {
+            
+            // Parámetros
+            if (tokens.get(currentToken).getValue().equals("(")) {
                 currentToken++;
-                System.out.println("-- }");
+                System.out.println("-- (");
+                RULE_PARAMS();
+                if (tokens.get(currentToken).getValue().equals(")")) {
+                    currentToken++;
+                    System.out.println("-- )");
+                } else {
+                    error(9);
+                }
             } else {
-                error(11);
+                error(10);
             }
-        } else {
-            error(12);
+            
+            // Cuerpo del método
+            if (tokens.get(currentToken).getValue().equals("{")) {
+                currentToken++;
+                System.out.println("-- {");
+                RULE_BODY();
+                if (tokens.get(currentToken).getValue().equals("}")) {
+                    currentToken++;
+                    System.out.println("-- }");
+                } else {
+                    error(11);
+                }
+            } else {
+                error(12);
+            }
         }
     }
-}
+
     // TYPES: int | float | char | boolean | void
     private void RULE_TYPES() {
-    System.out.println("--- RULE_TYPES");
-    if (isType(tokens.get(currentToken))) {
-        System.out.println("--- " + tokens.get(currentToken).getValue());
-        currentToken++;
-    } else {
-        error(13);
+        System.out.println("--- RULE_TYPES");
+        if (isType(tokens.get(currentToken))) {
+            System.out.println("--- " + tokens.get(currentToken).getValue());
+            currentToken++;
+        } else {
+            error(13);
+        }
     }
-}
 
     // Check if token is a valid type
     private boolean isType(TheToken token) {
@@ -130,165 +130,129 @@ private void RULE_PROGRAM() {
 
     // PARAMS: (type identifier (, type identifier)*)?
     private void RULE_PARAMS() {
-    System.out.println("--- RULE_PARAMS");
-    if (isType(tokens.get(currentToken))) {
-        RULE_TYPES();
-        if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-            currentToken++;
-            System.out.println("--- IDENTIFIER");
-        } else {
-            error(14);
-        }
-        
-        // Parámetros adicionales opcionales
-        while (tokens.get(currentToken).getValue().equals(",")) {
-            currentToken++;
-            System.out.println("--- ,");
+        System.out.println("--- RULE_PARAMS");
+        if (isType(tokens.get(currentToken))) {
             RULE_TYPES();
             if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
                 currentToken++;
                 System.out.println("--- IDENTIFIER");
             } else {
-                error(15);
+                error(14);
+            }
+            
+            // Parámetros adicionales opcionales
+            while (tokens.get(currentToken).getValue().equals(",")) {
+                currentToken++;
+                System.out.println("--- ,");
+                RULE_TYPES();
+                if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+                    currentToken++;
+                    System.out.println("--- IDENTIFIER");
+                } else {
+                    error(15);
+                }
             }
         }
     }
-}
 
     // BODY: Include various statement types
-   private void RULE_BODY() {
-    System.out.println("--- RULE_BODY");
-    while (!tokens.get(currentToken).getValue().equals("}")) {
-        // Declaraciones de variables locales
-        if (isType(tokens.get(currentToken))) {
-            RULE_VARIABLE();
+    private void RULE_BODY() {
+        System.out.println("--- RULE_BODY");
+        while (!tokens.get(currentToken).getValue().equals("}")) {
+            // Declaraciones de variables locales
+            if (isType(tokens.get(currentToken))) {
+                RULE_VARIABLE();
+            }
+            // Llamadas a métodos
+            else if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+                RULE_CALL_METHOD();
+            }
+            // Estructuras de control
+            else if (tokens.get(currentToken).getValue().equals("if")) {
+                RULE_IF();
+            }
+            else if (tokens.get(currentToken).getValue().equals("while")) {
+                RULE_WHILE();
+            }
+            // Agregar más estructuras de control según sea necesario
+            else {
+                // Procesar expresiones
+                RULE_EXPRESSION();
+                if (tokens.get(currentToken).getValue().equals(";")) {
+                    currentToken++;
+                } else {
+                    error(16);
+                }
+            }
         }
-        // Llamadas a métodos
-        else if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-            RULE_CALL_METHOD();
+    }
+
+    // Local variable declaration with optional initialization
+    private void RULE_VARIABLE() {
+        System.out.println("--- RULE_VARIABLE");
+        RULE_TYPES();
+        if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+            currentToken++;
+            
+            // Inicialización opcional
+            if (tokens.get(currentToken).getValue().equals("=")) {
+                currentToken++;
+                RULE_EXPRESSION();
+            }
+            
+            if (tokens.get(currentToken).getValue().equals(";")) {
+                currentToken++;
+            } else {
+                error(17);
+            }
+        } else {
+            error(18);
         }
-        // Estructuras de control
-        else if (tokens.get(currentToken).getValue().equals("if")) {
-            RULE_IF();
+    }
+
+    // IF statement
+    private void RULE_IF() {
+        System.out.println("--- RULE_IF");
+        currentToken++; // Consumir 'if'
+        
+        // Condición entre paréntesis
+        if (tokens.get(currentToken).getValue().equals("(")) {
+            currentToken++;
+            RULE_EXPRESSION();
+            if (tokens.get(currentToken).getValue().equals(")")) {
+                currentToken++;
+            } else {
+                error(19);
+            }
+        } else {
+            error(20);
         }
-        else if (tokens.get(currentToken).getValue().equals("while")) {
-            RULE_WHILE();
-        }
-        // Agregar más estructuras de control según sea necesario
-        else {
-            // Procesar expresiones
+        
+        // Cuerpo (una línea o bloque)
+        if (tokens.get(currentToken).getValue().equals("{")) {
+            currentToken++;
+            RULE_BODY();
+            if (tokens.get(currentToken).getValue().equals("}")) {
+                currentToken++;
+            } else {
+                error(21);
+            }
+        } else {
             RULE_EXPRESSION();
             if (tokens.get(currentToken).getValue().equals(";")) {
                 currentToken++;
             } else {
-                error(16);
+                error(22);
             }
         }
     }
-}
-
-    // Local variable declaration with optional initialization
-    private void RULE_VARIABLE() {
-    System.out.println("--- RULE_VARIABLE");
-    RULE_TYPES();
-    if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-        currentToken++;
-        
-        // Inicialización opcional
-        if (tokens.get(currentToken).getValue().equals("=")) {
-            currentToken++;
-            RULE_EXPRESSION();
-        }
-        
-        if (tokens.get(currentToken).getValue().equals(";")) {
-            currentToken++;
-        } else {
-            error(17);
-        }
-    } else {
-        error(18);
-    }
-}
-
-    // IF statement
-    private void RULE_IF() {
-    System.out.println("--- RULE_IF");
-    currentToken++; // Consumir 'if'
-    
-    // Condición entre paréntesis
-    if (tokens.get(currentToken).getValue().equals("(")) {
-        currentToken++;
-        RULE_EXPRESSION();
-        if (tokens.get(currentToken).getValue().equals(")")) {
-            currentToken++;
-        } else {
-            error(19);
-        }
-    } else {
-        error(20);
-    }
-    
-    // Cuerpo (una línea o bloque)
-    if (tokens.get(currentToken).getValue().equals("{")) {
-        currentToken++;
-        RULE_BODY();
-        if (tokens.get(currentToken).getValue().equals("}")) {
-            currentToken++;
-        } else {
-            error(21);
-        }
-    } else {
-        RULE_EXPRESSION();
-        if (tokens.get(currentToken).getValue().equals(";")) {
-            currentToken++;
-        } else {
-            error(22);
-        }
-    }
-}
-
-private void RULE_WHILE() {
-    System.out.println("--- RULE_WHILE");
-    currentToken++; // Consumir 'while'
-    
-    // Condición entre paréntesis
-    if (tokens.get(currentToken).getValue().equals("(")) {
-        currentToken++;
-        RULE_EXPRESSION();
-        if (tokens.get(currentToken).getValue().equals(")")) {
-            currentToken++;
-        } else {
-            error(25);
-        }
-    } else {
-        error(26);
-    }
-    
-    // Cuerpo (una línea o bloque)
-    if (tokens.get(currentToken).getValue().equals("{")) {
-        currentToken++;
-        RULE_BODY();
-        if (tokens.get(currentToken).getValue().equals("}")) {
-            currentToken++;
-        } else {
-            error(27);
-        }
-    } else {
-        RULE_EXPRESSION();
-        if (tokens.get(currentToken).getValue().equals(";")) {
-            currentToken++;
-        } else {
-            error(28);
-        }
-    }
-}
 
     // WHILE statement
     private void RULE_WHILE() {
         System.out.println("--- RULE_WHILE");
-        currentToken++; // Consume 'while'
+        currentToken++; // Consumir 'while'
         
-        // Condition in parentheses
+        // Condición entre paréntesis
         if (tokens.get(currentToken).getValue().equals("(")) {
             currentToken++;
             RULE_EXPRESSION();
@@ -301,7 +265,7 @@ private void RULE_WHILE() {
             error(26);
         }
         
-        // Body (single statement or block)
+        // Cuerpo (una línea o bloque)
         if (tokens.get(currentToken).getValue().equals("{")) {
             currentToken++;
             RULE_BODY();
@@ -320,54 +284,35 @@ private void RULE_WHILE() {
         }
     }
 
-    // Additional method stubs for further implementation
-    private void RULE_DO_WHILE() {
-        System.out.println("--- RULE_DO_WHILE");
-        // TODO: Implement DO-WHILE logic
-        error(29);
-    }
-
-    private void RULE_FOR() {
-        System.out.println("--- RULE_FOR");
-        // TODO: Implement FOR loop logic
-        error(30);
-    }
-
-    private void RULE_SWITCH() {
-        System.out.println("--- RULE_SWITCH");
-        // TODO: Implement SWITCH statement logic
-        error(31);
-    }
-
     // Method call
     private void RULE_CALL_METHOD() {
-    System.out.println("--- RULE_CALL_METHOD");
-    if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-        currentToken++;
-        
-        // Parámetros del método
-        if (tokens.get(currentToken).getValue().equals("(")) {
+        System.out.println("--- RULE_CALL_METHOD");
+        if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
             currentToken++;
-            RULE_PARAM_VALUES();
-            if (tokens.get(currentToken).getValue().equals(")")) {
+            
+            // Parámetros del método
+            if (tokens.get(currentToken).getValue().equals("(")) {
+                currentToken++;
+                RULE_PARAM_VALUES();
+                if (tokens.get(currentToken).getValue().equals(")")) {
+                    currentToken++;
+                } else {
+                    error(32);
+                }
+            } else {
+                error(33);
+            }
+            
+            // Terminar con punto y coma
+            if (tokens.get(currentToken).getValue().equals(";")) {
                 currentToken++;
             } else {
-                error(32);
+                error(34);
             }
         } else {
-            error(33);
+            error(35);
         }
-        
-        // Terminar con punto y coma
-        if (tokens.get(currentToken).getValue().equals(";")) {
-            currentToken++;
-        } else {
-            error(34);
-        }
-    } else {
-        error(35);
     }
-}
 
     // Method call parameters
     private void RULE_PARAM_VALUES() {
@@ -385,130 +330,30 @@ private void RULE_WHILE() {
 
     // RETURN statement
     private void RULE_RETURN() {
-    System.out.println("--- RULE_RETURN");
-    currentToken++; // Consumir 'return'
-    
-    // Valor de retorno opcional
-    if (!tokens.get(currentToken).getValue().equals(";")) {
-        RULE_EXPRESSION();
+        System.out.println("--- RULE_RETURN");
+        currentToken++; // Consumir 'return'
+        
+        // Valor de retorno opcional
+        if (!tokens.get(currentToken).getValue().equals(";")) {
+            RULE_EXPRESSION();
+        }
+        
+        if (tokens.get(currentToken).getValue().equals(";")) {
+            currentToken++;
+        } else {
+            error(30);
+        }
     }
-    
-    if (tokens.get(currentToken).getValue().equals(";")) {
-        currentToken++;
-    } else {
-        error(36);
-    }
-}
 
-    // Expression handling with operator precedence
+    // Expression rule
     private void RULE_EXPRESSION() {
         System.out.println("--- RULE_EXPRESSION");
-        RULE_X(); // Lowest precedence
+        // Placeholder for actual expression parsing logic
+        currentToken++;
     }
 
-    private void RULE_X() {
-        RULE_Y();
-        while (isAssignmentOperator(tokens.get(currentToken))) {
-            currentToken++;
-            RULE_Y();
-        }
-    }
-
-    private void RULE_Y() {
-        RULE_R();
-        while (isLogicalOperator(tokens.get(currentToken))) {
-            currentToken++;
-            RULE_R();
-        }
-    }
-
-    private void RULE_R() {
-        RULE_E();
-        while (isComparisonOperator(tokens.get(currentToken))) {
-            currentToken++;
-            RULE_E();
-        }
-    }
-
-    private void RULE_E() {
-        RULE_A();
-        while (isAdditiveOperator(tokens.get(currentToken))) {
-            currentToken++;
-            RULE_A();
-        }
-    }
-
-    private void RULE_A() {
-        RULE_B();
-        while (isMultiplicativeOperator(tokens.get(currentToken))) {
-            currentToken++;
-            RULE_B();
-        }
-    }
-
-    private void RULE_B() {
-        RULE_C();
-    }
-
-    private void RULE_C() {
-        // Handling different types of expressions: method calls, variables, literals
-        if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-            // Check if it's a method call
-            if (tokens.get(currentToken + 1).getValue().equals("(")) {
-                RULE_CALL_METHOD();
-            } else {
-                currentToken++; // Simple variable
-            }
-        } else if (isLiteral(tokens.get(currentToken))) {
-            currentToken++;
-        } else if (tokens.get(currentToken).getValue().equals("(")) {
-            currentToken++;
-            RULE_EXPRESSION();
-            if (tokens.get(currentToken).getValue().equals(")")) {
-                currentToken++;
-            } else {
-                error(37);
-            }
-        } else {
-            error(38);
-        }
-    }
-
-    // Helper methods for operator and literal checks
-    private boolean isAssignmentOperator(TheToken token) {
-        return token.getValue().equals("=") || token.getValue().equals("+=") ||
-               token.getValue().equals("-=") || token.getValue().equals("*=") ||
-               token.getValue().equals("/=");
-    }
-
-    private boolean isLogicalOperator(TheToken token) {
-        return token.getValue().equals("&&") || token.getValue().equals("||");
-    }
-
-    private boolean isComparisonOperator(TheToken token) {
-        return token.getValue().equals("==") || token.getValue().equals("!=") ||
-               token.getValue().equals("<") || token.getValue().equals(">") ||
-               token.getValue().equals("<=") || token.getValue().equals(">=");
-    }
-
-    private boolean isAdditiveOperator(TheToken token) {
-        return token.getValue().equals("+") || token.getValue().equals("-");
-    }
-
-    private boolean isMultiplicativeOperator(TheToken token) {
-        return token.getValue().equals("*") || token.getValue().equals("/") ||
-               token.getValue().equals("%");
-    }
-
-    private boolean isLiteral(TheToken token) {
-        return token.getType().equals("INTEGER") || token.getType().equals("FLOAT") ||
-               token.getType().equals("BINARY") || token.getType().equals("OCTAL") ||
-               token.getType().equals("HEX");
-    }
-
-    // Error handling method
-    private void error(int error) {
-        System.out.println("Error " + error + " at token: " + tokens.get(currentToken));
-        System.exit(1);
+    // Error handling
+    private void error(int code) {
+        System.out.println("Error in code: " + code);
     }
 }
