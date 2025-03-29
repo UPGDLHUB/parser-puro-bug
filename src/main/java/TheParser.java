@@ -13,6 +13,7 @@ public class TheParser {
         RULE_PROGRAM();
     }
 
+    // PROGRAM: { global variable declarations methods }
     private void RULE_PROGRAM() {
         System.out.println("- RULE_PROGRAM");
         if (tokens.get(currentToken).getValue().equals("{")) {
@@ -22,7 +23,10 @@ public class TheParser {
             error(1);
         }
         
-        RULE_GLOBAL_DECLARATIONS();
+        // Declaraciones de atributos globales
+        RULE_DECLARATIONS();
+        
+        // Declaraciones de métodos
         RULE_METHODS();
         
         if (tokens.get(currentToken).getValue().equals("}")) {
@@ -33,13 +37,21 @@ public class TheParser {
         }
     }
 
-    private void RULE_GLOBAL_DECLARATIONS() {
-        System.out.println("-- RULE_GLOBAL_DECLARATIONS");
+    // DECLARATIONS: (type identifier (= EXPRESSION)? ;)*
+    private void RULE_DECLARATIONS() {
+        System.out.println("-- RULE_DECLARATIONS");
         while (isType(tokens.get(currentToken))) {
             RULE_TYPES();
             if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
                 System.out.println("-- IDENTIFIER");
                 currentToken++;
+                
+                // Optional initialization
+                if (tokens.get(currentToken).getValue().equals("=")) {
+                    currentToken++;
+                    RULE_EXPRESSION();
+                }
+                
                 if (tokens.get(currentToken).getValue().equals(";")) {
                     currentToken++;
                     System.out.println("-- ;");
@@ -52,16 +64,21 @@ public class TheParser {
         }
     }
 
+    // METHODS: (type identifier ( PARAMS ) { BODY })*
     private void RULE_METHODS() {
         System.out.println("-- RULE_METHODS");
         while (isType(tokens.get(currentToken))) {
             RULE_TYPES();
+            
+            // Nombre del método
             if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
                 currentToken++;
                 System.out.println("-- IDENTIFIER");
             } else {
                 error(8);
             }
+            
+            // Parámetros
             if (tokens.get(currentToken).getValue().equals("(")) {
                 currentToken++;
                 System.out.println("-- (");
@@ -75,6 +92,8 @@ public class TheParser {
             } else {
                 error(10);
             }
+            
+            // Cuerpo del método
             if (tokens.get(currentToken).getValue().equals("{")) {
                 currentToken++;
                 System.out.println("-- {");
@@ -120,6 +139,8 @@ public class TheParser {
             } else {
                 error(14);
             }
+            
+            // Parámetros adicionales opcionales
             while (tokens.get(currentToken).getValue().equals(",")) {
                 currentToken++;
                 System.out.println("--- ,");
