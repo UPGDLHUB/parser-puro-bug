@@ -13,11 +13,11 @@ public class TheParser {
         RULE_PROGRAM();
     }
 
-    // Función de error mejorada
+    // Función de error ajustada para funcionar sin getLineNumber()
     private void error(int error) {
         System.out.println("Error " + error +
-                " at line " + tokens.get(currentToken).getLineNumber() +
-                ", token: " + tokens.get(currentToken).getValue());
+                ", token: " + tokens.get(currentToken).getValue() +
+                ", type: " + tokens.get(currentToken).getType());
         System.exit(1);
     }
 
