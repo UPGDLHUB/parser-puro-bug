@@ -911,71 +911,91 @@ public class TheParser {
 
    private void RULE_B() {
     System.out.println("--- RULE_B");
-    if (tokens.get(currentToken).getType().equals("INTEGER") || 
-        tokens.get(currentToken).getType().equals("FLOAT")) {
-        System.out.println("--- " + tokens.get(currentToken).getValue());
+    if (tokens.get(currentToken).getValue().equals("-")) {
+        System.out.println("--- -");
         currentToken++;
-    } else if (tokens.get(currentToken).getType().equals("CHAR") ||
-               tokens.get(currentToken).getType().equals("STRING")) {
-        System.out.println("--- " + tokens.get(currentToken).getValue());
-        currentToken++;
-    } else if (tokens.get(currentToken).getValue().equals("true") ||
-               tokens.get(currentToken).getValue().equals("false")) {
-        System.out.println("--- " + tokens.get(currentToken).getValue());
-        currentToken++;
-    } else if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-        // Check if it's a variable or method call
-        String identifier = tokens.get(currentToken).getValue();
-        currentToken++;
-        System.out.println("--- IDENTIFIER");
-        
-        // If it's a method call (has opening parenthesis)
-        if (currentToken < tokens.size() && tokens.get(currentToken).getValue().equals("(")) {
-            currentToken--;  // Step back to process the method call correctly
-            RULE_CALL_METHOD_IN_EXPR();
-        }
-    } else if (tokens.get(currentToken).getValue().equals("(")) {
-        currentToken++;
-        System.out.println("--- (");
-        RULE_EXPRESSION();
-        if (tokens.get(currentToken).getValue().equals(")")) {
-            currentToken++;
-            System.out.println("--- )");
-        } else {
-            error(80);
-        }
-    } else if (tokens.get(currentToken).getValue().equals("-")) {
-        // Negative number
-        currentToken++;
-        System.out.println("--- - (unary)");
-        RULE_B();
-    } else {
-        error(81);
     }
+    RULE_C();
 }
 
-// Method call within an expression
-private void RULE_CALL_METHOD_IN_EXPR() {
-    System.out.println("--- RULE_CALL_METHOD_IN_EXPR");
-    if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+private void RULE_C() {
+    System.out.println("--- RULE_C");
+    if (tokens.get(currentToken).getType().equals("INTEGER")) {
+        System.out.println("--- INTEGER");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getType().equals("OCTAL")) {
+        System.out.println("--- OCTAL");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getType().equals("HEXADECIMAL")) {
+        System.out.println("--- HEXADECIMAL");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getType().equals("BINARY")) {
+        System.out.println("--- BINARY");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getValue().equals("true")) {
+        System.out.println("--- TRUE");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getValue().equals("false")) {
+        System.out.println("--- FALSE");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getType().equals("STRING")) {
+        System.out.println("--- STRING");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getType().equals("CHAR")) {
+        System.out.println("--- CHAR");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getType().equals("FLOAT")) {
+        System.out.println("--- FLOAT");
+        currentToken++;
+    }
+    else if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+        // Puede ser una variable o una llamada a método como valor
         currentToken++;
         System.out.println("--- IDENTIFIER");
         
-        // Parameters of the method
-        if (tokens.get(currentToken).getValue().equals("(")) {
+        // Si viene un paréntesis, es una llamada a método como valor
+        if (currentToken < tokens.size() && tokens.get(currentToken).getValue().equals("(")) {
             currentToken++;
             System.out.println("--- (");
             RULE_PARAM_VALUES();
             if (tokens.get(currentToken).getValue().equals(")")) {
                 currentToken++;
                 System.out.println("--- )");
-            } else {
-                error(82);
             }
-        } else {
-            error(83);
+            else {
+                error(80);
+            }
         }
-    } else {
-        error(84);
     }
+    else if (tokens.get(currentToken).getValue().equals("(")) {
+        System.out.println("--- (");
+        currentToken++;
+        RULE_EXPRESSION();
+        if (tokens.get(currentToken).getValue().equals(")")) {
+            System.out.println("--- )");
+            currentToken++;
+        }
+        else {
+            error(4);
+        }
+    }
+    else {
+        error(5);
+    }
+}
+
+// Error handling with your specified format
+private void error(int error) {
+    System.out.println("Error " + error +
+            " at line " + tokens.get(currentToken).getLineNumber() +
+            ", token: " + tokens.get(currentToken).getValue());
+    System.exit(1);
 }
