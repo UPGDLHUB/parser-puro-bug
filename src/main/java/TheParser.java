@@ -998,3 +998,4 @@ private void error(int error) {
             ", token: " + tokens.get(currentToken).getValue());
     System.exit(1);
 }
+}
