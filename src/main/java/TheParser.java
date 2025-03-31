@@ -13,6 +13,14 @@ public class TheParser {
         RULE_PROGRAM();
     }
 
+    // Función de error mejorada
+    private void error(int error) {
+        System.out.println("Error " + error +
+                " at line " + tokens.get(currentToken).getLineNumber() +
+                ", token: " + tokens.get(currentToken).getValue());
+        System.exit(1);
+    }
+
     // PROGRAM: { global variable declarations methods }
     private void RULE_PROGRAM() {
         System.out.println("- RULE_PROGRAM");
@@ -970,9 +978,3 @@ public class TheParser {
             error(5);
         }
     }
-
-    // Error handling
-    private void error(int code) {
-        System.out.println("Error in code: " + code);
-    }
-}
