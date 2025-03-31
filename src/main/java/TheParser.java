@@ -4,7 +4,7 @@ import java.util.Vector;
  * Main class to run the lexer
  *
  * @author sebastianavilez
- * @author gabrieltorres
+ * @author gabrieltorreszacarias
  */
 
 public class TheParser {
