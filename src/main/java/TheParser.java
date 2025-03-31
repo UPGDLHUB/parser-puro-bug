@@ -13,7 +13,7 @@ public class TheParser {
         RULE_PROGRAM();
     }
 
-    // Error handling with detailed information
+    // Método de error mejorado
     private void error(int error) {
         System.out.println("Error " + error +
                 " at line " + tokens.get(currentToken).getLineNumber() +
@@ -909,146 +909,73 @@ public class TheParser {
         }
     }
 
-    private void RULE_B() {
-		System.out.println("--------- RULE_B");
-		if (tokens.get(currentToken).getValue().equals("-")) {
-			currentToken++;
-			System.out.println("--------- -");
-		}
-		RULE_C();
-	}
+   private void RULE_B() {
+    System.out.println("--- RULE_B");
+    if (tokens.get(currentToken).getType().equals("INTEGER") || 
+        tokens.get(currentToken).getType().equals("FLOAT")) {
+        System.out.println("--- " + tokens.get(currentToken).getValue());
+        currentToken++;
+    } else if (tokens.get(currentToken).getType().equals("CHAR") ||
+               tokens.get(currentToken).getType().equals("STRING")) {
+        System.out.println("--- " + tokens.get(currentToken).getValue());
+        currentToken++;
+    } else if (tokens.get(currentToken).getValue().equals("true") ||
+               tokens.get(currentToken).getValue().equals("false")) {
+        System.out.println("--- " + tokens.get(currentToken).getValue());
+        currentToken++;
+    } else if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+        // Check if it's a variable or method call
+        String identifier = tokens.get(currentToken).getValue();
+        currentToken++;
+        System.out.println("--- IDENTIFIER");
+        
+        // If it's a method call (has opening parenthesis)
+        if (currentToken < tokens.size() && tokens.get(currentToken).getValue().equals("(")) {
+            currentToken--;  // Step back to process the method call correctly
+            RULE_CALL_METHOD_IN_EXPR();
+        }
+    } else if (tokens.get(currentToken).getValue().equals("(")) {
+        currentToken++;
+        System.out.println("--- (");
+        RULE_EXPRESSION();
+        if (tokens.get(currentToken).getValue().equals(")")) {
+            currentToken++;
+            System.out.println("--- )");
+        } else {
+            error(80);
+        }
+    } else if (tokens.get(currentToken).getValue().equals("-")) {
+        // Negative number
+        currentToken++;
+        System.out.println("--- - (unary)");
+        RULE_B();
+    } else {
+        error(81);
+    }
+}
 
-	private void RULE_C() {
-		System.out.println("---------- RULE_C");
-		if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-			if (currentToken + 1 < tokens.size() && tokens.get(currentToken + 1).getValue().equals("(")) {
-				RULE_CALL_METHOD();
-			} else {
-				System.out.println("---------- IDENTIFIER: " + tokens.get(currentToken).getValue());
-				currentToken++;
-			}
-		} else if (tokens.get(currentToken).getType().equals("INTEGER") ||
-				tokens.get(currentToken).getType().equals("FLOAT") ||
-				tokens.get(currentToken).getType().equals("CHAR") ||
-				tokens.get(currentToken).getType().equals("STRING") ||
-				tokens.get(currentToken).getType().equals("HEXADECIMAL") ||
-				tokens.get(currentToken).getType().equals("BINARY") ||
-				(tokens.get(currentToken).getType().equals("KEYWORD") &&
-						(tokens.get(currentToken).getValue().equals("true") ||
-								tokens.get(currentToken).getValue().equals("false")))) {
-			System.out.println("---------- LITERAL: " + tokens.get(currentToken).getValue());
-			currentToken++;
-		} else if (tokens.get(currentToken).getValue().equals("(")) {
-			currentToken++;
-			System.out.println("---------- (");
-			RULE_EXPRESSION();
-			if (tokens.get(currentToken).getValue().equals(")")) {
-				currentToken++;
-				System.out.println("---------- )");
-			} else {
-				error(59);
-			}
-		} else {
-			error(60);
-		}
-	}
-
-	private void RULE_TYPE() {
-		System.out.println("----- RULE_TYPE");
-		if (tokens.get(currentToken).getType().equals("KEYWORD") &&
-				(tokens.get(currentToken).getValue().equals("int") ||
-						tokens.get(currentToken).getValue().equals("float") ||
-						tokens.get(currentToken).getValue().equals("void") ||
-						tokens.get(currentToken).getValue().equals("char") ||
-						tokens.get(currentToken).getValue().equals("string") ||
-						tokens.get(currentToken).getValue().equals("boolean"))) {
-			System.out.println("----- TYPE: " + tokens.get(currentToken).getValue());
-			currentToken++;
-		} else {
-			error(61);
-		}
-	}
-
-	private boolean isType() {
-		return tokens.get(currentToken).getType().equals("KEYWORD") &&
-				(tokens.get(currentToken).getValue().equals("int") ||
-						tokens.get(currentToken).getValue().equals("float") ||
-						tokens.get(currentToken).getValue().equals("void") ||
-						tokens.get(currentToken).getValue().equals("char") ||
-						tokens.get(currentToken).getValue().equals("string") ||
-						tokens.get(currentToken).getValue().equals("boolean"));
-	}
-
-	private boolean isMethodDeclaration() {
-		int savePos = currentToken;
-		try {
-			if (isType()) {
-				currentToken++;
-				if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-					currentToken++;
-					return tokens.get(currentToken).getValue().equals("(");
-				}
-			}
-			return false;
-		} finally {
-			currentToken = savePos;
-		}
-	}
-
-	private boolean isAssignment() {
-		if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-			if (currentToken + 1 < tokens.size() &&
-					tokens.get(currentToken + 1).getValue().equals("=")) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean isMethodCall() {
-		if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
-			if (currentToken + 1 < tokens.size() &&
-					tokens.get(currentToken + 1).getValue().equals("(")) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean isReturnStatement() {
-		return tokens.get(currentToken).getType().equals("KEYWORD") &&
-				tokens.get(currentToken).getValue().equals("return");
-	}
-
-	private boolean isWhileStatement() {
-		return tokens.get(currentToken).getType().equals("KEYWORD") &&
-				tokens.get(currentToken).getValue().equals("while");
-	}
-
-	private boolean isIfStatement() {
-		return tokens.get(currentToken).getType().equals("KEYWORD") &&
-				tokens.get(currentToken).getValue().equals("if");
-	}
-
-	private boolean isDoStatement() {
-		return tokens.get(currentToken).getType().equals("KEYWORD") &&
-				tokens.get(currentToken).getValue().equals("do");
-	}
-
-	private boolean isForStatement() {
-		return tokens.get(currentToken).getType().equals("KEYWORD") &&
-				tokens.get(currentToken).getValue().equals("for");
-	}
-
-	private boolean isSwitchStatement() {
-		return tokens.get(currentToken).getType().equals("KEYWORD") &&
-				tokens.get(currentToken).getValue().equals("switch");
-	}
-
-	private void error(int error) {
-		System.out.println("Error " + error +
-				" at line " + tokens.get(currentToken).getLineNumber() +
-				", token: " + tokens.get(currentToken).getValue());
-		System.exit(1);
-	}
+// Method call within an expression
+private void RULE_CALL_METHOD_IN_EXPR() {
+    System.out.println("--- RULE_CALL_METHOD_IN_EXPR");
+    if (tokens.get(currentToken).getType().equals("IDENTIFIER")) {
+        currentToken++;
+        System.out.println("--- IDENTIFIER");
+        
+        // Parameters of the method
+        if (tokens.get(currentToken).getValue().equals("(")) {
+            currentToken++;
+            System.out.println("--- (");
+            RULE_PARAM_VALUES();
+            if (tokens.get(currentToken).getValue().equals(")")) {
+                currentToken++;
+                System.out.println("--- )");
+            } else {
+                error(82);
+            }
+        } else {
+            error(83);
+        }
+    } else {
+        error(84);
+    }
 }
