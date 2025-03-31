@@ -9,7 +9,7 @@ public class TheToken {
 	
 	private String value;
 	private String type;
-	private int lineNumber;  // Nuevo campo para almacenar el número de línea
+	private int lineNumber;  // Campo para almacenar el número de línea
 	
 	public TheToken(String value, String type) {
 		this.value = value;
@@ -32,7 +32,7 @@ public class TheToken {
 		return type;
 	}
 	
-	// Método nuevo para obtener el número de línea
+	// Método para obtener el número de línea
 	public int getLineNumber() {
 		return lineNumber;
 	}
