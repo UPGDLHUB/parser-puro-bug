@@ -123,9 +123,15 @@ public class TheParser {
 
     // Check if token is a valid type
     private boolean isType(TheToken token) {
-        return token.getValue().equals("int") || token.getValue().equals("float") ||
-               token.getValue().equals("char") || token.getValue().equals("boolean") ||
-               token.getValue().equals("void");
+        private boolean isType() {
+		return tokens.get(currentToken).getType().equals("KEYWORD") &&
+				(tokens.get(currentToken).getValue().equals("int") ||
+						tokens.get(currentToken).getValue().equals("float") ||
+						tokens.get(currentToken).getValue().equals("void") ||
+						tokens.get(currentToken).getValue().equals("char") ||
+						tokens.get(currentToken).getValue().equals("string") ||
+						tokens.get(currentToken).getValue().equals("boolean"));
+	}
     }
 
     // PARAMS: (type identifier (, type identifier)*)?
