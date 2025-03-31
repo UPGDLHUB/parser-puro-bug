@@ -990,11 +990,4 @@ private void RULE_C() {
         error(5);
     }
 }
-    
-private void error(int error) {
-    System.out.println("Error " + error +
-            " at line " + tokens.get(currentToken).getLineNumber() +
-            ", token: " + tokens.get(currentToken).getValue());
-    System.exit(1);
-}
 }
