@@ -13,7 +13,8 @@ public class TheLexer {
     private Automata dfa;
     private Vector<TheToken> tokens;
     private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-        "int", "float", "if", "else", "while", "do", "break", "continue", "end", "boolean"
+        "int", "end", "if", "else", "while", "do", "for", "break", "continue",
+        "class", "float", "true", "false", "string", "char", "void", "boolean", "return", "switch", "case", "default"
     ));
 
     public TheLexer(File file) {
@@ -95,6 +96,7 @@ public class TheLexer {
 
         // Estados de aceptación
         dfa.addAcceptState("s3", "BINARY");
+        dfa.addAcceptState("s1", "INTEGER");
         dfa.addAcceptState("s4", "INTEGER");
         dfa.addAcceptState("s5", "FLOAT");
         dfa.addAcceptState("s6", "IDENTIFIER");
@@ -106,24 +108,37 @@ public class TheLexer {
     public void run() throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
+            int lineNumber = 1;
             while ((line = reader.readLine()) != null) {
-                processLine(line);
+                processLine(line, lineNumber);
+                lineNumber++;
             }
         }
     }
 
-    private void processLine(String line) {
+    private void processLine(String line, int lineNumber) {
         int i = 0;
         StringBuilder currentToken = new StringBuilder();
         String currentState = "s0";
+        boolean inComment = false;
 
         while (i < line.length()) {
             char c = line.charAt(i);
             
+            // Check for the beginning of a comment
+            if (c == '/' && i + 1 < line.length() && line.charAt(i + 1) == '/') {
+                // Found a comment, process any existing token and exit the loop
+                if (currentToken.length() > 0) {
+                    addToken(currentState, currentToken.toString(), lineNumber);
+                }
+                // Skip the rest of the line
+                return;
+            }
+            
             // Ignorar espacios en blanco
             if (isWhitespace(c)) {
                 if (currentToken.length() > 0) {
-                    addToken(currentState, currentToken.toString());
+                    addToken(currentState, currentToken.toString(), lineNumber);
                     currentToken = new StringBuilder();
                     currentState = "s0";
                 }
@@ -134,10 +149,10 @@ public class TheLexer {
             // Manejar delimitadores y operadores
             if (isDelimiter(c)) {
                 if (currentToken.length() > 0) {
-                    addToken(currentState, currentToken.toString());
+                    addToken(currentState, currentToken.toString(), lineNumber);
                     currentToken = new StringBuilder();
                 }
-                tokens.add(new TheToken(String.valueOf(c), "DELIMITER"));
+                tokens.add(new TheToken(String.valueOf(c), "DELIMITER", lineNumber));
                 currentState = "s0";
                 i++;
                 continue;
@@ -145,17 +160,27 @@ public class TheLexer {
 
             if (isOperator(c)) {
                 if (currentToken.length() > 0) {
-                    addToken(currentState, currentToken.toString());
+                    addToken(currentState, currentToken.toString(), lineNumber);
                     currentToken = new StringBuilder();
                 }
                 
                 // Verificar operadores dobles
                 String operator = String.valueOf(c);
-                if (i + 1 < line.length() && isPartOfDoubleOperator(c, line.charAt(i + 1))) {
-                    operator = c + String.valueOf(line.charAt(i + 1));
-                    i++;
+                if (i + 1 < line.length()) {
+                    char nextChar = line.charAt(i + 1);
+                    
+                    // Check for comment marker
+                    if (c == '/' && nextChar == '/') {
+                        // It's a comment, exit the loop
+                        return;
+                    }
+                    
+                    if (isPartOfDoubleOperator(c, nextChar)) {
+                        operator = c + String.valueOf(nextChar);
+                        i++;
+                    }
                 }
-                tokens.add(new TheToken(operator, "OPERATOR"));
+                tokens.add(new TheToken(operator, "OPERATOR", lineNumber));
                 currentState = "s0";
                 i++;
                 continue;
@@ -168,7 +193,7 @@ public class TheLexer {
                 currentState = nextState;
             } else {
                 if (currentToken.length() > 0) {
-                    addToken(currentState, currentToken.toString());
+                    addToken(currentState, currentToken.toString(), lineNumber);
                     currentToken = new StringBuilder();
                 }
                 currentToken.append(c);
@@ -179,22 +204,22 @@ public class TheLexer {
 
         // Procesar el último token
         if (currentToken.length() > 0) {
-            addToken(currentState, currentToken.toString());
+            addToken(currentState, currentToken.toString(), lineNumber);
         }
     }
 
-    private void addToken(String state, String value) {
+    private void addToken(String state, String value, int lineNumber) {
         if (dfa.isAcceptState(state)) {
             String type = dfa.getAcceptStateName(state);
             if (type.equals("IDENTIFIER") && KEYWORDS.contains(value.toLowerCase())) {
-                tokens.add(new TheToken(value, "KEYWORD"));
+                tokens.add(new TheToken(value, "KEYWORD", lineNumber));
             } else if (type.equals("BINARY") && !value.matches("0b[01]+")) {
-                tokens.add(new TheToken(value, "ERROR"));
+                tokens.add(new TheToken(value, "ERROR", lineNumber));
             } else {
-                tokens.add(new TheToken(value, type));
+                tokens.add(new TheToken(value, type, lineNumber));
             }
         } else {
-            tokens.add(new TheToken(value, "ERROR"));
+            tokens.add(new TheToken(value, "ERROR", lineNumber));
         }
     }
 
@@ -204,30 +229,33 @@ public class TheLexer {
 
     private boolean isDelimiter(char c) {
         return c == ',' || c == ';' || c == '(' || c == ')' || c == '[' || c == ']' 
-            || c == '{' || c == '}' || c == 'A';  // Si 'A' se considera delimitador
+            || c == '{' || c == '}' || c == ':'; 
     }
 
     private boolean isOperator(char c) {
-        return c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || 
-               c == '<' || c == '>' || c == '%';
+        return  c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || 
+                c == '<' || c == '>' || c == '%' || c == '!' || c == '&' || c == '|';
     }
 
     private boolean isPartOfDoubleOperator(char first, char second) {
         String op = first + "" + second;
-        return op.equals("==") || op.equals("!=") || op.equals("<=") || 
-               op.equals(">=") || op.equals("+=") || op.equals("-=") || 
-               op.equals("*=") || op.equals("/=");
+        return  op.equals("==") || op.equals("!=") || op.equals("<=") || 
+                op.equals(">=") || op.equals("+=") || op.equals("-=") || 
+                op.equals("*=") || op.equals("/=") || op.equals("%=") ||
+                op.equals("++") || op.equals("--") || op.equals("||") ||
+                op.equals("&&");
     }
 
     public void printTokens() {
         System.out.println("\nToken List:");
-        System.out.printf("%-15s -> %-12s\n", "Value", "Type");
-        System.out.println("-".repeat(30));
+        System.out.printf("%-15s -> %-12s -> %s\n", "Value", "Type", "Line");
+        System.out.println("-".repeat(40));
         
         for (TheToken token : tokens) {
-            System.out.printf("%-15s -> %-12s\n", 
+            System.out.printf("%-15s -> %-12s -> %d\n", 
                 truncateValue(token.getValue()), 
-                token.getType());
+                token.getType(),
+                token.getLineNumber());
         }
         System.out.println("\nTotal tokens: " + tokens.size());
     }
